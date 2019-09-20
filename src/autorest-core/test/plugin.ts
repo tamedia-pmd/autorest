@@ -6,7 +6,7 @@ import { suite, test, slow, timeout, skip, only } from "mocha-typescript";
 import * as assert from 'assert';
 import { PumpMessagesToConsole } from './test-utility';
 
-import { Extension, ExtensionManager } from "@microsoft.azure/extension";
+import { Extension, ExtensionManager } from "@tampmd/azure.extension";
 import { RealFileSystem } from "../lib/file-system";
 import { AutoRest } from "../lib/autorest-core";
 import { CancellationToken } from "../lib/ref/cancellation";

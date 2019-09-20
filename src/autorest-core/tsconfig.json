@@ -12,14 +12,11 @@
     "strict": true,
     "declaration": true,
     "stripInternal": true,
-    "target": "es2017",
+    "target": "es6",
     "types": [
       "node",
       "mocha"
-    ],
-    "lib": [
-      "esnext"
-    ],
+    ], 
     "experimentalDecorators": true,
     "newLine": "LF",
     "plugins": [

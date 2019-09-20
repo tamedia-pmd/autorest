@@ -8,7 +8,7 @@ import { EventEmitter } from "../events";
 import { fork, ChildProcess } from "child_process";
 import { Mappings, RawSourceMap, SmartPosition } from "../ref/source-map";
 import { CancellationToken } from "../ref/cancellation";
-import { createMessageConnection } from "../ref/jsonrpc";
+import { createMessageConnection, StreamMessageWriter, StreamMessageReader } from "../ref/jsonrpc";
 import { DataHandle, DataSink, DataSource } from '../data-store/data-store';
 import { IAutoRestPluginInitiator_Types, IAutoRestPluginTarget_Types, IAutoRestPluginInitiator } from "./plugin-api";
 import { Exception } from "../exception";
@@ -62,7 +62,9 @@ export class AutoRestExtension extends EventEmitter {
 
   public static async FromChildProcess(extensionName: string, childProc: ChildProcess): Promise<AutoRestExtension> {
     const plugin = new AutoRestExtension(extensionName, childProc.stdout, childProc.stdin, childProc);
-    childProc.stderr.pipe(process.stderr);
+    if(childProc.stderr) {
+      childProc.stderr.pipe(process.stderr);
+    }
     AutoRestExtension.processes.push(childProc);
     // poke the extension to detect trivial issues like process startup failure or protocol violations, ...
     if (!Array.isArray(await plugin.GetPluginNames(CancellationToken.None))) {
@@ -78,10 +80,15 @@ export class AutoRestExtension extends EventEmitter {
   public constructor(private extensionName: string, reader: Readable, writer: Writable, private childProcess: ChildProcess) {
     super();
 
+    if(!reader) {
+      reader = new Readable();
+    }
+
     // hook in inspectors
     reader.on("data", chunk => {
       try { this.__inspectTraffic.push([Date.now(), false, chunk.toString()]); } catch (e) { }
     });
+
     const writerProxy = new Writable({
       write: (chunk: string | Buffer, encoding: string, callback: Function) => {
         try { this.__inspectTraffic.push([Date.now(), true, chunk.toString()]); } catch (e) { }
@@ -90,9 +97,15 @@ export class AutoRestExtension extends EventEmitter {
     });
 
     // create channel
-    const channel = createMessageConnection(reader, writerProxy, console);
-    channel.listen();
+    let channel = createMessageConnection(reader, writerProxy, console);
+    if(!channel) {
+      channel = createMessageConnection(
+        new StreamMessageReader(process.stdin),
+        new StreamMessageWriter(process.stdout)
+      );
+    }
 
+    channel.listen();
     // initiator
     const dispatcher = (fnName: string) => async (sessionId: string, ...rest: any[]) => {
       try {

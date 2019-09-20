@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Stringify, ParseToAst } from './ref/yaml';
-import { Extension, ExtensionManager, LocalExtension } from "@microsoft.azure/extension";
+import { Extension, ExtensionManager, LocalExtension } from "@tampmd/azure.extension";
 import { ChildProcess } from "child_process";
 
 import { join, basename, dirname } from "path";

@@ -9,16 +9,13 @@
     "emitDecoratorMetadata": true,
     "declaration": true,
     "stripInternal": true,
-    "target": "es2017",
+    "target": "es6",
     "types": [
       "node",
       "mocha"
     ],
     "typeRoots": [
       "./node_modules/@types"
-    ],
-    "lib": [
-      "esnext"
     ],
     "plugins": [
       {

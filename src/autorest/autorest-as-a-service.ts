@@ -1,6 +1,6 @@
 
 import { lookup } from "dns";
-import { Extension, ExtensionManager } from "@microsoft.azure/extension";
+import { Extension, ExtensionManager } from "@tampmd/azure.extension";
 import { homedir } from "os";
 import { dirname, join, resolve } from "path";
 
@@ -25,7 +25,7 @@ export const rootFolder = join(process.env["autorest.home"], ".autorest");
 const args = (<any>global).__args || {};
 
 export const extensionManager: Promise<ExtensionManager> = ExtensionManager.Create(rootFolder);
-export const corePackage = "@microsoft.azure/autorest-core"; // autorest-core"
+export const corePackage = "@tampmd/azure.autorest-core"; // autorest-core"
 const basePkgVersion = pkgVersion.indexOf("-") > -1 ? pkgVersion.substring(0, pkgVersion.indexOf("-")) : pkgVersion;
 const versionRange = `^${basePkgVersion}`; // the version range of the core package required.
 
@@ -65,7 +65,7 @@ export async function installedCores() {
 
 export function resolvePathForLocalVersion(requestedVersion: string | null): string | null {
   try {
-    return requestedVersion ? resolve(requestedVersion) : dirname(require.resolve("@microsoft.azure/autorest-core/package.json"));
+    return requestedVersion ? resolve(requestedVersion) : dirname(require.resolve("@tampmd/azure.autorest-core/package.json"));
   } catch (e) {
 
   }
@@ -186,11 +186,7 @@ export async function selectVersion(requestedVersion: string, force: boolean, mi
     }
 
     const pkg = await (await extensionManager).findPackage(corePackage, requestedVersion);
-    if (pkg) {
-      if (args.debug) {
-        console.log(`Selected package: ${pkg.name}@${pkg.version} => ${pkg.resolvedInfo.rawSpec} `);
-      }
-    } else {
+    if (!pkg) {
       throw new Exception(`Unable to find a valid AutoRest Core package for '${requestedVersion}'.`);
     }
 
